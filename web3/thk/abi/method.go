@@ -1,13 +1,38 @@
 package abi
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"reflect"
 	"strings"
-
 	"web3.go/common"
 )
+
+const (
+	ErrorMethodId = "0x08c379a0"
+)
+
+var ErrorMethod Method
+
+func init() {
+	typeString, _ := NewType("string", []ArgumentMarshaling{{
+		Name:       "string",
+		Type:       "string",
+		Components: nil,
+		Indexed:    false,
+	}})
+	ErrorMethod = Method{
+		Name:   "error",
+		Const:  false,
+		Inputs: nil,
+		Outputs: []Argument{{
+			Name:    "revertReason",
+			Type:    typeString,
+			Indexed: false,
+		}},
+	}
+}
 
 type Method struct {
 	Name    string
@@ -92,4 +117,32 @@ func (method Method) multInputUnpack(v []interface{}, input []byte) error {
 		}
 	}
 	return nil
+}
+
+func IsErrorOutput(output string) bool {
+	return strings.HasPrefix(output, ErrorMethodId)
+}
+
+type ErrorOutput struct {
+	RevertReason string `json:"revertReason"`
+}
+
+func ExtractRevertReason(output string) (*ErrorOutput, error) {
+	if !IsErrorOutput(output) {
+		return nil, fmt.Errorf("not error output")
+	}
+
+	// 剔除最前面的0x标记
+	output = common.CleanHexPrefix(output)
+
+	decodeBytes, err := hex.DecodeString(output)
+	if err != nil {
+		return nil, err
+	}
+
+	res := new(ErrorOutput)
+	if err := ErrorMethod.Outputs.Unpack(res, decodeBytes[4:]); err != nil {
+		return nil, err
+	}
+	return res, nil
 }

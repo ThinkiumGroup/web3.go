@@ -155,6 +155,23 @@ func (contract *Contract) Parse(out string, name string, args interface{}) error
 		return nil
 	}
 }
+
+func (contract *Contract) CallAndParse(chainId, contractAddress, method string, args ...interface{}) (result interface{}, err error) {
+	transaction := util.Transaction{
+		ChainId: chainId, FromChainId: chainId, ToChainId: chainId,
+		From: contractAddress, To: contractAddress, Value: "0", Nonce: "0", Input: "",
+	}
+	receipt, err := contract.Call(transaction, method, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = contract.Parse(receipt.Out, method, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (contract *Contract) GetInput(functionName string, args ...interface{}) (string, error) {
 	fixedArrStrPack, err := contract.abi.Pack(functionName, args...)
 	if err != nil {

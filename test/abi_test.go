@@ -160,3 +160,14 @@ func TestDecodeMethod(t *testing.T) {
 	t.Logf("inputMap=%v", inputMap)
 
 }
+
+func TestDecodeError(t *testing.T) {
+	output := "0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000012496e73756666696369656e742066756e64730000000000000000000000000000"
+	res, err := abi2.ExtractRevertReason(output)
+	if err != nil {
+		t.Error(err.Error())
+		t.FailNow()
+	}
+
+	t.Logf("res:%v", res)
+}

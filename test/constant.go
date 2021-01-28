@@ -6,14 +6,15 @@ import (
 	"web3.go/web3/providers"
 )
 
+const (
+	RpcHost    = "rpctest.thinkium.org"
+	TmpKey     = "0xc614545a9f1d9a2eeda26836e42a4c11631f25dc3d0dcc37fe62a89c4ff293d1"
+	TmpAddress = "0x5dfcfc6f4b48f93213dad643a50228ff873c15b9"
+)
+
 var (
-	RpcHost                  = "rpctest.thinkium.org"
-	Web3                     = web3.NewWeb3(providers.NewHTTPProvider(RpcHost, 10, false))
-	DefaultValue             = "1" + "000000000000000000"
-	TmpKey                   = "0xc614545a9f1d9a2eeda26836e42a4c11631f25dc3d0dcc37fe62a89c4ff293d1"
-	TmpAddress               = "0x5dfcfc6f4b48f93213dad643a50228ff873c15b9"
-	Erc20JsonLocation        = "../resources/ERC20.json"
-	TokenVestingJsonLocation = "../resources/TokenVesting.json"
+	Web3         = web3.NewWeb3(providers.NewHTTPProvider(RpcHost, 10, false))
+	DefaultValue = "1" + "000000000000000000"
 )
 
 func init() {

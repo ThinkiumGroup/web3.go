@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"math/big"
 	"strings"
 	"web3.go/common"
@@ -59,30 +58,14 @@ func (tx Transaction) HashValue() ([]byte, error) {
 }
 
 func (tx Transaction) hashSerialize() (string, error) {
-	var toAddr string
-	var fromAddr string
-	if common.HasHexPrefix(tx.To) {
-		toAddr = tx.To[2:]
-		toAddr = strings.ToLower(toAddr)
-	}
-
-	if common.HasHexPrefix(tx.From) {
-		fromAddr = tx.From[2:]
-		fromAddr = strings.ToLower(fromAddr)
-	}
-	var input string
-	if common.HasHexPrefix(tx.Input) {
-		input = tx.Input[2:]
-		input = strings.ToLower(input)
-	}
+	toAddr := strings.ToLower(common.CleanHexPrefix(tx.To))
+	fromAddr := strings.ToLower(common.CleanHexPrefix(tx.From))
+	input := strings.ToLower(common.CleanHexPrefix(tx.Input))
 	u := "0"
 	if tx.UseLocal {
 		u = "1"
 	}
-	if common.HasHexPrefix(tx.Extra) {
-		tx.Extra = tx.Extra[2:]
-	}
-	extra := strings.ToLower(tx.Extra)
+	extra := strings.ToLower(common.CleanHexPrefix(tx.Extra))
 	str := []string{tx.ChainId, fromAddr, toAddr, tx.Nonce, u, tx.Value, input, extra}
 	return strings.Join(str, "-"), nil
 }
@@ -129,24 +112,20 @@ type CompileContractJson struct {
 	Contract string `json:"contract"`
 }
 
-type BlockGetCallback func() (interface{}, error)
+type Callback func() (res interface{}, _break bool)
 
-func BlockGet(callback BlockGetCallback) (interface{}, error) {
+func BlockGetDefault(callback Callback) interface{} {
+	return BlockGet(callback, 10, 3)
+}
+func BlockGet(callback Callback, maxTime, sleepSeconds int) interface{} {
 	times := 1
 	for {
-		res, err := callback()
-		if err != nil {
-			return nil, err
-		}
-		if res == nil {
-			if times > 5 {
-				return nil, fmt.Errorf("get timeout")
-			}
+		res, _break := callback()
+		if !_break && times < maxTime && res == nil {
 			times++
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Duration(sleepSeconds) * time.Second)
 			continue
-		} else {
-			return res, nil
 		}
+		return res
 	}
 }

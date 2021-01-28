@@ -11,9 +11,7 @@ var (
 )
 
 func HexToPrivateKey(h string) (cipher.ECCPrivateKey, error) {
-	if HasHexPrefix(h) {
-		h = h[2:]
-	}
+	h = CleanHexPrefix(h)
 	bs, err := hex.DecodeString(h)
 	if err != nil {
 		return nil, err
