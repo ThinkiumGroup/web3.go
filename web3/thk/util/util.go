@@ -23,11 +23,11 @@ type GetBlockTxsJson struct {
 type Account struct {
 	Addr            string   `json:"address"`
 	Nonce           uint64   `json:"nonce"`
-	Balance         *big.Int `json:"balance"`         // 系统基础货币 TUE，不为nil
-	LocalCurrency   *big.Int `json:"localCurrency"`   // 本链第二货币（如果存在），可为nil
-	StorageRoot     []byte   `json:"storageRoot"`     // 智能合约使用的存储，Trie(key: Hash, value: Hash)
-	CodeHash        []byte   `json:"codeHash"`        // 合约代码的Hash
-	LongStorageRoot []byte   `json:"longStorageRoot"` // 系统合约用来保存更灵活的数据结构, Trie(key: Hash, value: []byte)
+	Balance         *big.Int `json:"balance"`         // System base currency TKM, not nil
+	LocalCurrency   *big.Int `json:"localCurrency"`   // The second currency in the chain (if any) can be nil
+	StorageRoot     []byte   `json:"storageRoot"`     // Storage used by smart contract, trie (key: hash, value: hash)
+	CodeHash        []byte   `json:"codeHash"`        // Hash of contract code
+	LongStorageRoot []byte   `json:"longStorageRoot"` // System contract is used to save more flexible data structure, trie (key: hash, value: [] byte)
 	ErrMsg          string   `json:"errMsg,omitempty"`
 }
 type Transaction struct {
@@ -42,13 +42,12 @@ type Transaction struct {
 	Pub          string   `json:"pub,omitempty"`
 	Input        string   `json:"input"`
 	UseLocal     bool     `json:"useLocal"`
-	Extra        string   `json:"extra"` // 目前用来存交易类型，不存在时为普通交易，否则会对应特殊操作
+	Extra        string   `json:"extra"` // It is currently used to save transaction types. If it does not exist, it is a normal transaction. Otherwise, it will correspond to special operations
 	ExpireHeight int64    `json:"expireHeight,omitempty"`
 	Multipubs    []string `json:"multipubs"`
 	Multisigs    []string `json:"multisigs"`
 }
 
-// 此处与rpcTx的Hash算法一致
 func (tx Transaction) HashValue() ([]byte, error) {
 	s, err := tx.hashSerialize()
 	if err != nil {

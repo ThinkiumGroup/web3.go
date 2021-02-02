@@ -17,17 +17,16 @@ var (
 	expireAfter = 200
 )
 
-// 跨链转账流程，从A链跨链转到B链
-// 1-首先从A链开支票，发送一笔交易到【系统跨链取款合约(0x0000000000000000000000000000000000020000)】, 需要指定支票过期高度--指的是当B链高度超过（不含）这个值时，这张支票不能被支取，只能退回
-// 2-检查上一步交易结果
-// 3-如果交易成功，从A链获取B链支票存款证明
-// 4-将返回的支票证明作为input，从B链发送一笔交易到【系统跨链存款合约(0x0000000000000000000000000000000000030000)】
-// 5-检查上步骤交易结果，如果交易成功则跨链转账成功
-
-// 撤销支票-达到指定块高之后才能被取消
-// 6-如果到达指定块高支票未被支取则需要手动取消跨链存款
-// 7-从B链获取支票撤销证明并将之作为input，发送一笔交易到【系统跨链撤销存款合约(0x0000000000000000000000000000000000030000)】
-// 8-检查上步骤交易状态，如果失败可重试6、7、8步骤或者联系芯际技术协助处理
+//Cross chain transfer process, from a chain to B chain
+//1 - first, write a check from chain a, send a transaction to [system cross chain withdrawal contract (0x000000000000000)], and specify the overdue height of the check -- that is, when the height of chain B exceeds (excluding) this value, the check cannot be withdrawn, but can only be returned
+//2 - check the previous transaction result
+//3 - if the transaction is successful, obtain the check deposit certificate of chain B from chain a
+//4 - send a transaction from chain B to [system cross chain deposit contract (0x000000000003000000)] with the returned check certificate as input
+//5 - check the transaction result of the previous step. If the transaction is successful, the cross chain transfer is successful
+//Cancel check - the check cannot be cancelled until the specified block height is reached
+//6 - if the check reaches the specified block height and is not withdrawn, the cross chain deposit needs to be cancelled manually
+//7 - get the check cancellation certificate from the B chain and use it as input to send a transaction to [system cross chain cancellation deposit contract (0x000000000003000000)]
+//8 - check the transaction status of the previous step. If it fails, try step 6, 7, 8 again or contact inter core technology for assistance
 
 func TestEncodeDecode(t *testing.T) {
 	input := "0x00000001f167a1c5c5fab6bddca66118216817af3fa86827000000000000018500000067f167a1c5c5fab6bddca66118216817af3fa8682700000000005ef43c20000000000000000000000000000000000000000000000001158e460913d00000"
@@ -39,15 +38,14 @@ func TestEncodeDecode(t *testing.T) {
 	fmt.Println(test.JsonFormat(cash))
 }
 
-//跨链转账测试
 func TestTransferAcrossChain(t *testing.T) {
 	expireAfter = 200
-	fmt.Println("===开支票===")
+	fmt.Println("===Write a check===")
 	cheque := genCheque(t)
-	fmt.Println("===获取兑现支票的证明===")
+	fmt.Println("===Get proof of cashing a check===")
 	proof := getChequeProof(cheque, t)
 
-	fmt.Println("===兑现支票===")
+	fmt.Println("===Cash a check===")
 	tx := util.Transaction{
 		ChainId: toChainId, FromChainId: toChainId, ToChainId: toChainId, From: test.Web3.Thk.DefaultAddress,
 		To: thk.SystemContractAddressDeposit, Value: "0", Input: proof,
@@ -55,13 +53,12 @@ func TestTransferAcrossChain(t *testing.T) {
 	cashOrCancelCheque(tx, t)
 }
 
-//跨链转账过期取消支票
 func TestCancelCheque(t *testing.T) {
 	expireAfter = 3
-	fmt.Println("===开支票===")
+	fmt.Println("===Write a check===")
 	cheque := genCheque(t)
 	expireHeight, _ := strconv.Atoi(cheque.ExpireHeight)
-	fmt.Println("===等待支票过期===")
+	fmt.Println("===Waiting for the check to expire===")
 	for {
 		time.Sleep(2 * time.Second)
 		stats, err := test.Web3.Thk.GetStats(toChainId)
@@ -75,7 +72,7 @@ func TestCancelCheque(t *testing.T) {
 		}
 	}
 
-	fmt.Println("===支票已过期，生成撤销支票的证明===")
+	fmt.Println("===The check has expired. Generate proof to cancel the check===")
 	time.Sleep(2 * time.Second)
 	proofCancel := getCancelChequeProof(cheque, t)
 	tx2 := util.Transaction{
@@ -83,11 +80,10 @@ func TestCancelCheque(t *testing.T) {
 		To: thk.SystemContractAddressCancel, Value: "0", Input: proofCancel,
 	}
 	fmt.Println(test.JsonFormat(tx2))
-	fmt.Println("===撤销支票===")
+	fmt.Println("===Cancel a check===")
 	cashOrCancelCheque(tx2, t)
 }
 
-//开支票
 func genCheque(t *testing.T) *thk.CashCheque {
 	chainInfo, err := test.Web3.Thk.GetStats(toChainId)
 	if err != nil {
@@ -148,7 +144,6 @@ func genCheque(t *testing.T) *thk.CashCheque {
 	return cashCheque
 }
 
-//获取兑现支票的证明
 func getChequeProof(cashCheque *thk.CashCheque, t *testing.T) string {
 	time.Sleep(5 * time.Second)
 	proofRes, err := test.Web3.Thk.RpcMakeVccProof(cashCheque)
@@ -164,7 +159,6 @@ func getChequeProof(cashCheque *thk.CashCheque, t *testing.T) string {
 	return proofRes["input"].(string)
 }
 
-//生成撤销支票的证明
 func getCancelChequeProof(cashCheque *thk.CashCheque, t *testing.T) string {
 	cashCheque.ChainId = toChainId
 	res, err := test.Web3.Thk.MakeCCCExistenceProof(cashCheque)
@@ -184,7 +178,6 @@ func getCancelChequeProof(cashCheque *thk.CashCheque, t *testing.T) string {
 	return res["input"].(string)
 }
 
-//兑现或取消支票
 func cashOrCancelCheque(tx util.Transaction, t *testing.T) {
 	nonce, err := test.Web3.Thk.GetNonce(test.Web3.Thk.DefaultAddress, tx.ChainId)
 	if err != nil {

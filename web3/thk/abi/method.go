@@ -95,7 +95,6 @@ func (method Method) singleInputUnpack(v interface{}, input []byte) error {
 func (method Method) multInputUnpack(v []interface{}, input []byte) error {
 	j := 0
 	for i := 0; i < len(method.Inputs); i++ {
-		// v[i]必须是指针类型
 		valueOf := reflect.ValueOf(v[i])
 		if reflect.Ptr != valueOf.Kind() {
 			s := fmt.Sprintf("abi: Unpack(non-pointer %T)", v)
@@ -132,7 +131,6 @@ func ExtractRevertReason(output string) (*ErrorOutput, error) {
 		return nil, fmt.Errorf("not error output")
 	}
 
-	// 剔除最前面的0x标记
 	output = common.CleanHexPrefix(output)
 
 	decodeBytes, err := hex.DecodeString(output)

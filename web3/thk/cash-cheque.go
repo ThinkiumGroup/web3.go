@@ -12,7 +12,7 @@ import (
 	"web3.go/common/hexutil"
 )
 
-var (
+const (
 	SystemContractAddressWithdraw = "0x0000000000000000000000000000000000020000"
 	SystemContractAddressDeposit  = "0x0000000000000000000000000000000000030000"
 	SystemContractAddressCancel   = "0x0000000000000000000000000000000000040000"
@@ -28,13 +28,13 @@ type (
 )
 
 type MyCashCheque struct {
-	FromChain    MyChainId      `json:"FromChain"`    // 转出链
-	FromAddress  common.Address `json:"FromAddr"`     // 转出账户
-	Nonce        uint64         `json:"Nonce"`        // 转出账户提交请求时的nonce
-	ToChain      MyChainId      `json:"ToChain"`      // 目标链
-	ToAddress    common.Address `json:"ToAddr"`       // 目标账户
-	ExpireHeight MyHeight       `json:"ExpireHeight"` // 过期高度，指的是当目标链高度超过（不含）这个值时，这张支票不能被支取，只能退回
-	Amount       *big.Int       `json:"Amount"`       // 金额
+	FromChain    MyChainId      `json:"FromChain"`
+	FromAddress  common.Address `json:"FromAddr"`
+	Nonce        uint64         `json:"Nonce"`
+	ToChain      MyChainId      `json:"ToChain"`
+	ToAddress    common.Address `json:"ToAddr"`
+	ExpireHeight MyHeight       `json:"ExpireHeight"` // The overdue height refers to that when the height of the target chain exceeds (excluding) this value, the check cannot be withdrawn and can only be returned
+	Amount       *big.Int       `json:"Amount"`
 }
 
 type CashCheque struct {
@@ -111,54 +111,54 @@ func (c *CashCheque) Decode(input string) error {
 	return nil
 }
 
-// 4字节FromChain + 20字节FromAddress + 8字节Nonce + 4字节ToChain + 20字节ToAddress +
-// 8字节ExpireHeight + 1字节len(Amount.Bytes()) + Amount.Bytes()
-// 均为BigEndian
+// 4bytes FromChain + 20bytes FromAddress + 8bytes Nonce + 4bytes ToChain + 20bytes ToAddress +
+// 8bytes ExpireHeight + 1bytes len(Amount.Bytes()) + Amount.Bytes()
+// They are all bigendian
 func (c *MyCashCheque) Serialization(w io.Writer) error {
 	buf4 := make([]byte, 4)
 	buf8 := make([]byte, 8)
 
-	// 4字节FromChain
+	// 4bytes FromChain
 	binary.BigEndian.PutUint32(buf4, uint32(c.FromChain))
 	_, err := w.Write(buf4)
 	if err != nil {
 		return err
 	}
 
-	// 20字节FromAddress
+	// 20bytes FromAddress
 	_, err = w.Write(c.FromAddress[:])
 	if err != nil {
 		return err
 	}
 
-	// 8字节Nonce
+	// 8bytes Nonce
 	binary.BigEndian.PutUint64(buf8, uint64(c.Nonce))
 	_, err = w.Write(buf8)
 	if err != nil {
 		return err
 	}
 
-	// 4字节ToChain
+	// 4bytes ToChain
 	binary.BigEndian.PutUint32(buf4, uint32(c.ToChain))
 	_, err = w.Write(buf4)
 	if err != nil {
 		return err
 	}
 
-	// 20字节ToAddress
+	// 20bytes ToAddress
 	_, err = w.Write(c.ToAddress[:])
 	if err != nil {
 		return err
 	}
 
-	// 8字节ExpireHeight
+	// 8bytes ExpireHeight
 	binary.BigEndian.PutUint64(buf8, uint64(c.ExpireHeight))
 	_, err = w.Write(buf8)
 	if err != nil {
 		return err
 	}
 
-	// 1字节len(Amount.Bytes())
+	// 1bytes len(Amount.Bytes())
 	buf4 = buf4[:1]
 	var amountBytes []byte
 	if c.Amount != nil {

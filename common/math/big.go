@@ -273,8 +273,8 @@ func BigIntForPrint(x *big.Int) string {
 	return string(y)
 }
 
-// r 不要大于1
-// x 返回不小于 i64*r 的最小整形
+//R should not be greater than 1
+//X returns the smallest integer not less than i64 * r
 func Int64MulRat(i64 int64, r *big.Rat) (x int64) {
 	rr := new(big.Rat).Mul(r, new(big.Rat).SetInt64(i64))
 	x, _ = RatToInt64(rr)
@@ -295,7 +295,7 @@ func MustBigInt(x *big.Int) *big.Int {
 	return x
 }
 
-// 返回不小于r的最小整形，如果r太大或被除0则nomeans为true，x无意义
+//Returns the smallest integer not less than R. if R is too large or divided by 0, then nomeans is true and X is meaningless
 func RatToInt64(r *big.Rat) (x int64, nomeans bool) {
 	f, _ := r.Float64()
 	if math.IsNaN(f) || math.IsInf(f, 0) {

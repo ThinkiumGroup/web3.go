@@ -18,7 +18,6 @@ type Contract struct {
 	functions map[string][]string
 }
 
-//新合约
 func (thk *Thk) NewContract(abistr string) (*Contract, error) {
 	contract := new(Contract)
 	var mockInterface interface{}
@@ -110,7 +109,6 @@ func (contract *Contract) Send(transaction util.Transaction, functionName string
 	return contract.super.SendTx(&transaction)
 }
 
-// 签名
 func (contract *Contract) SendSign(transaction util.Transaction, functionName string, privateKey string, args ...interface{}) (util.Transaction, error) {
 	//transaction, err := contract.prepareTransaction(transaction, functionName, args)
 	fixedArrStrPack, err := contract.abi.Pack(functionName, args...)

@@ -52,7 +52,7 @@ type TransactionResult struct {
 	Input     string   `json:"input"`
 	Hash      string   `json:"hash"`
 	UseLocal  bool     `json:"uselocal"`
-	Extra     string   `json:"extra"` // 目前用来存交易类型，不存在时为普通交易，否则会对应特殊操作
+	Extra     string   `json:"extra"` // It is currently used to save transaction types. If it does not exist, it is a normal transaction. Otherwise, it will correspond to special operations
 	Timestamp uint64   `json:"timestamp"`
 }
 
@@ -72,15 +72,15 @@ type TxResult struct {
 }
 
 type GetBlockResult struct {
-	Hash          string `json:"hash"`          // 此块的hsh
-	Previoushash  string `json:"previoushash"`  // 父块的hash
+	Hash          string `json:"hash"`          // Hash of this block
+	Previoushash  string `json:"previoushash"`  // Hash of parent block
 	ChainId       int    `json:"chainid"`       //
-	Height        int    `json:"height"`        // 查询块的块高
-	Empty         bool   `json:"empty"`         // 是否是空块
-	RewardAddress string `json:"rewardaddress"` // 接收地址
-	Mergeroot     string `json:"mergeroot"`     // 合并其他链转块数据hash
-	Deltaroot     string `json:"deltaroot"`     // 跨链转账数据hash
-	Stateroot     string `json:"stateroot"`     // 状态hash
+	Height        int    `json:"height"`        // The block height of the query block
+	Empty         bool   `json:"empty"`         // Is it an empty block
+	RewardAddress string `json:"rewardaddress"` // Receiving address
+	Mergeroot     string `json:"mergeroot"`     // Merge other chain block data hash
+	Deltaroot     string `json:"deltaroot"`     // Cross chain transfer data hash
+	Stateroot     string `json:"stateroot"`     // State hash
 	RREra         int    `json:"rrera"`
 	RRCurrent     string `json:"rrcurrent"`
 	RRNext        string `json:"rrnext"`
@@ -90,16 +90,16 @@ type GetBlockResult struct {
 }
 
 type NodeInfo struct {
-	NodeId        string      `json:"nodeId"`        // 节点id
-	Version       string      `json:"version"`       // 版本
-	IsDataNode    bool        `json:"isDataNode"`    //是否是数据节点
-	DataNodeOf    int         `json:"dataNodeOf"`    // 数据节点
-	LastMsgTime   int64       `json:"lastMsgTime"`   // 上一个信息时间
-	LastEventTime int64       `json:"lastEventTime"` // 上一个事件时间
-	LastBlockTime int64       `json:"lastBlockTime"` // 上一个块时间
-	Overflow      bool        `json:"overflow"`      // 溢出
-	LastBlocks    interface{} `json:"lastBlocks"`    // 最后一个块
-	OpTypes       interface{} `json:"opTypes"`       // 类型
+	NodeId        string      `json:"nodeId"`        // Node ID
+	Version       string      `json:"version"`       // edition
+	IsDataNode    bool        `json:"isDataNode"`    // Is it a data node
+	DataNodeOf    int         `json:"dataNodeOf"`    // Data node
+	LastMsgTime   int64       `json:"lastMsgTime"`   // Last message time
+	LastEventTime int64       `json:"lastEventTime"` // Last event time
+	LastBlockTime int64       `json:"lastBlockTime"` // Last block time
+	Overflow      bool        `json:"overflow"`      // overflow
+	LastBlocks    interface{} `json:"lastBlocks"`    // The last block
+	OpTypes       interface{} `json:"opTypes"`       // type
 	ErrMsg        string      `json:"ErrMsg,Omitempty"`
 }
 

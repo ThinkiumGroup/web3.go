@@ -145,14 +145,12 @@ func (abi *ABI) EventById(idBytes []byte) (*Event, error) {
 
 //inputParam input[4:]
 func (abi ABI) InputUnpack(v map[string]interface{}, name string, inputParam []byte) (err error) {
-	// 判断输入数据是否正确
 	if len(inputParam) == 0 {
 		return errors.New("abi: empty input")
 	} else if len(inputParam)%32 != 0 {
 		return errors.New("abi: improperly formatted input")
 	}
 
-	// 得到abi的方法信息
 	if method, ok := abi.Methods[name]; ok {
 		return method.Inputs.UnpackIntoMap(v, inputParam)
 	}

@@ -221,7 +221,7 @@ func LeftPadBytes(slice []byte, l int) []byte {
 	return padded
 }
 
-// 按 size 长度分割 bs 为slice数组，每个slice长度都为size
+//Divide BS into slices array according to size length, and each slice length is size
 func SplitBytes(bs []byte, size int) ([][]byte, error) {
 	if len(bs)%size != 0 {
 		return nil, errors.New(fmt.Sprintf("input length illegal: (%d)%%(%d)!=0", len(bs), size))
@@ -234,7 +234,7 @@ func SplitBytes(bs []byte, size int) ([][]byte, error) {
 	return r, nil
 }
 
-// 将参数的 slice数组 首尾相接返回一个slice，允许nil和空，返回的slice不为nil
+//Join the slice array of the parameter to return a slice. Nil and null are allowed. The returned slice is not nil
 func ConcatenateBytes(bss [][]byte) []byte {
 	size := 0
 	for i := 0; i < len(bss); i++ {

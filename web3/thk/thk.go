@@ -14,7 +14,7 @@ import (
 type Thk struct {
 	DefaultAddress          string
 	DefaultPrivateKey       string
-	DefaultExtraPrivateKeys []string // 多签
+	DefaultExtraPrivateKeys []string
 	DefaultAuthKey          string
 	DefaultChainId          string
 
@@ -42,7 +42,6 @@ func (thk *Thk) GetAccount(address string, chainId string) (*util.Account, error
 	return &res, nil
 }
 
-// 获取余额
 func (thk *Thk) GetBalance(address string, chainId string) (*big.Int, error) {
 	res, err := thk.GetAccount(address, chainId)
 	if err != nil {
@@ -52,7 +51,6 @@ func (thk *Thk) GetBalance(address string, chainId string) (*big.Int, error) {
 	return ret, nil
 }
 
-// 获取之前交易数
 func (thk *Thk) GetNonce(address string, chainId string) (int64, error) {
 	res, err := thk.GetAccount(address, chainId)
 	if err != nil {
@@ -61,7 +59,6 @@ func (thk *Thk) GetNonce(address string, chainId string) (int64, error) {
 	return int64(res.Nonce), nil
 }
 
-// 获取块交易 ListTxs
 func (thk *Thk) GetBlockTxs(chainId string, height string, page string, size string) (*dto.BlockTxs, error) {
 	params := util.GetBlockTxsJson{
 		ChainId: chainId,
@@ -91,7 +88,6 @@ func (thk *Thk) SendTx(transaction *util.Transaction) (string, error) {
 	return res.TXhash, nil
 }
 
-// 交易签名
 func (thk *Thk) SignTransaction(transaction *util.Transaction, privateKey string, multikeys ...string) error {
 	hash, err := transaction.HashValue()
 	if err != nil {
@@ -127,7 +123,6 @@ func (thk *Thk) SignTransaction(transaction *util.Transaction, privateKey string
 	return nil
 }
 
-// 调用交易
 func (thk *Thk) CallTransaction(transaction *util.Transaction) (*dto.TxResult, error) {
 	res := new(dto.TxResult)
 	if err := thk.provider.SendRequest(res, "CallTransaction", transaction); err != nil {
@@ -140,7 +135,6 @@ func (thk *Thk) CallTransaction(transaction *util.Transaction) (*dto.TxResult, e
 	return res, nil
 }
 
-// 通过hash获取交易
 func (thk *Thk) GetTransactionByHash(chainId string, hash string) (*dto.TxResult, error) {
 	params := util.GetTxByHash{
 		ChainId: chainId,
@@ -157,7 +151,6 @@ func (thk *Thk) GetTransactionByHash(chainId string, hash string) (*dto.TxResult
 	return res, nil
 }
 
-// 获取块结果
 func (thk *Thk) GetBlockHeader(chainId string, height string) (*dto.GetBlockResult, error) {
 	params := util.GetBlockHeader{
 		ChainId: chainId,
@@ -190,7 +183,6 @@ func (thk *Thk) Ping(address string) (*dto.NodeInfo, error) {
 	return res, nil
 }
 
-// 获取链节点信息
 func (thk *Thk) GetChainInfo(chainIds []int) ([]dto.GetChainInfo, error) {
 	params := new(util.GetChainInfoJson)
 	params.ChainIds = chainIds
@@ -201,7 +193,6 @@ func (thk *Thk) GetChainInfo(chainIds []int) ([]dto.GetChainInfo, error) {
 	return resArray, nil
 }
 
-// 获取链信息
 func (thk *Thk) GetStats(chainId string) (gts dto.GetChainStats, err error) {
 	params := new(util.GetStatsJson)
 	params.ChainId = chainId
@@ -230,7 +221,6 @@ func (thk *Thk) GetTransactions(chainId, address, startHeight, endHeight string)
 	return resArray, nil
 }
 
-// 获取委员会详情
 func (thk *Thk) GetCommittee(chainId string, epoch string) ([]string, error) {
 	params := util.GetCommitteeJson{
 		ChainId: chainId,
@@ -243,7 +233,6 @@ func (thk *Thk) GetCommittee(chainId string, epoch string) ([]string, error) {
 	return res, nil
 }
 
-// 获取兑现支票的证明
 func (thk *Thk) RpcMakeVccProof(cashCheque *CashCheque) (map[string]interface{}, error) {
 	res := make(map[string]interface{})
 	if err := thk.provider.SendRequest(&res, "RpcMakeVccProof", &cashCheque); err != nil {
@@ -252,7 +241,6 @@ func (thk *Thk) RpcMakeVccProof(cashCheque *CashCheque) (map[string]interface{},
 	return res, nil
 }
 
-// 获取取消支票的证明
 func (thk *Thk) MakeCCCExistenceProof(cashCheque *CashCheque) (map[string]interface{}, error) {
 	res := make(map[string]interface{})
 	if err := thk.provider.SendRequest(&res, "MakeCCCExistenceProof", cashCheque); err != nil {
@@ -278,7 +266,7 @@ func (thk *Thk) GetCCCRelativeTx(transaction *util.Transaction) (map[string]inte
 	return res.Proof, nil
 }
 
-// 获取nodeSig  nodeId,  address bindAddr privateKey for hex with 0x
+// get nodeSig  nodeId,  address bindAddr privateKey for hex with 0x
 //  nodeType  should be 0 for Consensus, 1 for data
 //  nonce  amount   string
 func (thk *Thk) GetNodeSig(nodeId string, nodeType string, address string, nonce string, amount string, privateKey string) (string, error) {
