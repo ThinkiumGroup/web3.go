@@ -130,12 +130,13 @@ func TestERC20Deploy(t *testing.T) {
 	}
 	erc20Address := receipt.ContractAddress
 	t.Log("erc20Address addr:", erc20Address)
-	result, err := erc20.CallAndParse(chainId, erc20Address, "symbol")
+	var symbol string
+	err = erc20.CallAndParse(chainId, erc20Address, &symbol, "symbol")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	t.Log("result:", result)
+	t.Log("result:", symbol)
 }
 
 // deploy token-vesting
@@ -281,13 +282,15 @@ func TestTokenVestingAddPlan(t *testing.T) {
 
 // release
 func TestTokenVestingRelease(t *testing.T) {
-	releasableAmount, err := tokenVesting.CallAndParse(chainId, tokenVestingAddress, "releasableAmount", fromAddress)
+	var releasableAmount *big.Int
+	err := tokenVesting.CallAndParse(chainId, tokenVestingAddress, &releasableAmount, "releasableAmount", fromAddress)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	t.Log("releasableAmount:", releasableAmount)
-	vestedAmount, err := tokenVesting.CallAndParse(chainId, tokenVestingAddress, "vestedAmount", fromAddress)
+	var vestedAmount *big.Int
+	err = tokenVesting.CallAndParse(chainId, tokenVestingAddress, &vestedAmount, "vestedAmount", fromAddress)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
