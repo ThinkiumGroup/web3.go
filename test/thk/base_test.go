@@ -2,9 +2,9 @@ package test
 
 import (
 	"fmt"
+	"github.com/ThinkiumGroup/web3.go/test"
 	"strconv"
 	"testing"
-	"web3.go/test"
 )
 
 func TestThkGetStats(t *testing.T) {

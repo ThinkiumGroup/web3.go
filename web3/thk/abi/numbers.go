@@ -1,10 +1,10 @@
 package abi
 
 import (
+	"github.com/ThinkiumGroup/web3.go/common"
+	"github.com/ThinkiumGroup/web3.go/common/math"
 	"math/big"
 	"reflect"
-	"web3.go/common"
-	"web3.go/common/math"
 )
 
 var (

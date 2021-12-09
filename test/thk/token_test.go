@@ -3,18 +3,18 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ThinkiumGroup/web3.go/common"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
+	"github.com/ThinkiumGroup/web3.go/test"
+	"github.com/ThinkiumGroup/web3.go/test/compiler"
+	"github.com/ThinkiumGroup/web3.go/web3/thk"
+	"github.com/ThinkiumGroup/web3.go/web3/thk/util"
 	"io/ioutil"
 	"math/big"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
-	"web3.go/common"
-	"web3.go/common/hexutil"
-	"web3.go/test"
-	"web3.go/test/compiler"
-	"web3.go/web3/thk"
-	"web3.go/web3/thk/util"
 )
 
 type ContractJson struct {

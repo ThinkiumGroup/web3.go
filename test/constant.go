@@ -2,8 +2,8 @@ package test
 
 import (
 	"encoding/json"
-	"web3.go/web3"
-	"web3.go/web3/providers"
+	"github.com/ThinkiumGroup/web3.go/web3"
+	"github.com/ThinkiumGroup/web3.go/web3/providers"
 )
 
 const (

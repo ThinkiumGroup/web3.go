@@ -3,8 +3,8 @@ package test
 import (
 	"errors"
 	"fmt"
-	"web3.go/web3/dto"
-	"web3.go/web3/thk/util"
+	"github.com/ThinkiumGroup/web3.go/web3/dto"
+	"github.com/ThinkiumGroup/web3.go/web3/thk/util"
 )
 
 func BlockGetTransactionReceipt(chainId, hash string) (*dto.TxResult, error) {

@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ThinkiumGroup/web3.go/web3/complex/types"
+	"github.com/ThinkiumGroup/web3.go/web3/constants"
 	"math/big"
 	"strconv"
 	"strings"
-	"web3.go/web3/complex/types"
-	"web3.go/web3/constants"
 )
 
 type RequestResult struct {

@@ -1,9 +1,13 @@
 package util
 
 import (
+	"encoding/json"
+	"errors"
+	common2 "github.com/ThinkiumGroup/go-common"
+	"github.com/ThinkiumGroup/web3.go/common"
 	"math/big"
+	"strconv"
 	"strings"
-	"web3.go/common"
 
 	"time"
 )
@@ -48,14 +52,61 @@ type Transaction struct {
 	Multisigs    []string `json:"multisigs"`
 }
 
-func (tx Transaction) HashValue() ([]byte, error) {
-	s, err := tx.hashSerialize()
+type GasProvider struct {
+	Type     byte     `json:"type"`
+	Gas      uint64   `json:"gas"`
+	GasPrice *big.Int `json:"gasPrice"`
+}
+
+var DefaultGasProvider = &GasProvider{
+	Type:     0,
+	Gas:      25000,
+	GasPrice: big.NewInt(40 * 10000 * 10000),
+}
+
+var BaseChainId int64 = 100007
+
+func (tx *Transaction) HashValue() ([]byte, error) {
+	chainId, ok := new(big.Int).SetString(tx.ChainId, 10)
+	if !ok {
+		return nil, errors.New("error chainId")
+	}
+	chainId.Add(chainId, big.NewInt(BaseChainId))
+	if tx.Value == "" {
+		tx.Value = "0"
+	}
+	value, ok := new(big.Int).SetString(tx.Value, 10)
+	if !ok {
+		return nil, errors.New("error value")
+	}
+	var gasProvider GasProvider
+	gasBytes := common.FromHex(tx.Extra)
+	if len(gasBytes) > 0 {
+		err := json.Unmarshal(gasBytes, &gasProvider)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if gasProvider.GasPrice == nil {
+		gasProvider.GasPrice = big.NewInt(0)
+	}
+	nonce, err := strconv.ParseInt(tx.Nonce, 10, 64)
 	if err != nil {
 		return nil, err
 	}
-	return common.Hash256(s), nil
+	hash := common2.RlpHash([]interface{}{
+		uint64(nonce),
+		gasProvider.GasPrice,
+		gasProvider.Gas,
+		common.FromHex(tx.To),
+		value,
+		common.FromHex(tx.Input),
+		chainId, uint(0), uint(0),
+	})
+	return hash.Bytes(), nil
 }
 
+// Deprecated
 func (tx Transaction) hashSerialize() (string, error) {
 	toAddr := strings.ToLower(common.CleanHexPrefix(tx.To))
 	fromAddr := strings.ToLower(common.CleanHexPrefix(tx.From))

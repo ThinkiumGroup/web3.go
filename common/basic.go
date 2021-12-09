@@ -2,22 +2,31 @@ package common
 
 import (
 	"encoding/hex"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
 	"regexp"
 	"strconv"
 	"strings"
-	"web3.go/common/hexutil"
 )
 
 var (
 	EmptyPlaceHolder = struct{}{}
 )
 
-const pad = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+const (
+	pad                       = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+	ReservedMaxChainID uint32 = 1 << 20
+)
 
 type (
+	ChainId uint32
+	Height  uint64
 	Hash    [HashLength]byte
 	Address [AddressLength]byte
 )
+
+func (id ChainId) IsNil() bool {
+	return uint32(id) == ReservedMaxChainID
+}
 
 func padLeft(str string, chars int) string {
 	if chars <= len(str) {

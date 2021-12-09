@@ -3,7 +3,7 @@ package common
 import (
 	"encoding/hex"
 	"github.com/ThinkiumGroup/go-cipher"
-	"web3.go/common/hexutil"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
 )
 
 var (

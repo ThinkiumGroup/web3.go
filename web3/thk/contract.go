@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
+	"github.com/ThinkiumGroup/web3.go/web3/dto"
+	"github.com/ThinkiumGroup/web3.go/web3/thk/abi"
+	"github.com/ThinkiumGroup/web3.go/web3/thk/util"
 	"math/big"
 	"strings"
-	"web3.go/common/hexutil"
-	"web3.go/web3/dto"
-	"web3.go/web3/thk/abi"
-	"web3.go/web3/thk/util"
 )
 
 type Contract struct {

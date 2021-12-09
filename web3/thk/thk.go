@@ -3,12 +3,12 @@ package thk
 import (
 	"errors"
 	"fmt"
+	"github.com/ThinkiumGroup/web3.go/common"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
+	"github.com/ThinkiumGroup/web3.go/web3/dto"
+	"github.com/ThinkiumGroup/web3.go/web3/providers"
+	"github.com/ThinkiumGroup/web3.go/web3/thk/util"
 	"math/big"
-	"web3.go/common"
-	"web3.go/common/hexutil"
-	"web3.go/web3/dto"
-	"web3.go/web3/providers"
-	"web3.go/web3/thk/util"
 )
 
 type Thk struct {
@@ -25,6 +25,9 @@ func NewThk(provider providers.ProviderInterface) *Thk {
 	thk := new(Thk)
 	thk.provider = provider
 	return thk
+}
+func SetBaseChainId(baseChainId int64) {
+	util.BaseChainId = baseChainId
 }
 
 func (thk *Thk) GetAccount(address string, chainId string) (*util.Account, error) {

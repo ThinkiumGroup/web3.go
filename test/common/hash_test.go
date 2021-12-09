@@ -3,9 +3,9 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
+	"github.com/ThinkiumGroup/web3.go/web3/thk/util"
 	"testing"
-	"web3.go/common/hexutil"
-	"web3.go/web3/thk/util"
 )
 
 type Tx struct {

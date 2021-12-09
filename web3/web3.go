@@ -1,11 +1,11 @@
 package web3
 
 import (
-	"web3.go/web3/account"
-	"web3.go/web3/net"
-	"web3.go/web3/providers"
-	"web3.go/web3/thk"
-	"web3.go/web3/utils"
+	"github.com/ThinkiumGroup/web3.go/web3/account"
+	"github.com/ThinkiumGroup/web3.go/web3/net"
+	"github.com/ThinkiumGroup/web3.go/web3/providers"
+	"github.com/ThinkiumGroup/web3.go/web3/thk"
+	"github.com/ThinkiumGroup/web3.go/web3/utils"
 )
 
 type Web3 struct {

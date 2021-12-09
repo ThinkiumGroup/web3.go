@@ -2,9 +2,9 @@ package common
 
 import (
 	"fmt"
+	"github.com/ThinkiumGroup/web3.go/common"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
 	"testing"
-	"web3.go/common"
-	"web3.go/common/hexutil"
 )
 
 func TestKey(t *testing.T) {

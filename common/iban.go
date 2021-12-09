@@ -1,12 +1,12 @@
 package common
 
 import (
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
 	"math"
 	"math/big"
 	"regexp"
 	"strconv"
 	"strings"
-	"web3.go/common/hexutil"
 )
 
 //Prepare an IBAN for mod 97 computation by moving the first 4 chars to the end and transforming the letters to

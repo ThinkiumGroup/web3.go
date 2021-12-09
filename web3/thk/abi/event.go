@@ -2,8 +2,8 @@ package abi
 
 import (
 	"fmt"
+	"github.com/ThinkiumGroup/web3.go/common"
 	"strings"
-	"web3.go/common"
 )
 
 type Event struct {

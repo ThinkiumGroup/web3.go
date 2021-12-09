@@ -3,11 +3,13 @@ package test
 import (
 	"bytes"
 	"encoding/hex"
+	"fmt"
+	"github.com/ThinkiumGroup/web3.go/common"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
+	abi2 "github.com/ThinkiumGroup/web3.go/web3/thk/abi"
 	"math/big"
 	"strings"
 	"testing"
-	"web3.go/common"
-	abi2 "web3.go/web3/thk/abi"
 )
 
 func TestUnpackEventIntoMap(t *testing.T) {
@@ -151,4 +153,6 @@ func TestDecodeError(t *testing.T) {
 	}
 
 	t.Logf("res:%v", res)
+	decode, _ := hexutil.Decode("0x7bf0a4401d3ecd7eb")
+	fmt.Println(string(decode))
 }

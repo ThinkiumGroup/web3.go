@@ -1,8 +1,8 @@
 package account
 
 import (
-	"web3.go/web3/dto"
-	"web3.go/web3/providers"
+	"github.com/ThinkiumGroup/web3.go/web3/dto"
+	"github.com/ThinkiumGroup/web3.go/web3/providers"
 )
 
 type Personal struct {
