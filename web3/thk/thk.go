@@ -170,6 +170,22 @@ func (thk *Thk) GetBlockHeader(chainId string, height string) (*dto.GetBlockResu
 	return res, nil
 }
 
+func (thk *Thk) GetBlock(chainId string, height string) (*dto.BlockDetail, error) {
+	params := util.GetBlockHeader{
+		ChainId: chainId,
+		Height:  height,
+	}
+	res := new(dto.BlockDetail)
+	if err := thk.provider.SendRequest(res, "GetBlock", params); err != nil {
+		return nil, err
+	}
+	if res.ErrMsg != "" {
+		err := errors.New(res.ErrMsg)
+		return nil, err
+	}
+	return res, nil
+}
+
 // Ping
 func (thk *Thk) Ping(address string) (*dto.NodeInfo, error) {
 	params := util.PingJson{

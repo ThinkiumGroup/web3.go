@@ -35,6 +35,15 @@ func TestThkGetBlockHeader(t *testing.T) {
 	fmt.Printf("res:%+v", res)
 }
 
+func TestThkGetBlock(t *testing.T) {
+	res, err := test.Web3.Thk.GetBlock("1", "23456987")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	fmt.Printf("res:%+v", res)
+}
+
 func TestThkPing(t *testing.T) {
 	res, err := test.Web3.Thk.Ping("192.168.1.14:23024")
 	if err != nil {
