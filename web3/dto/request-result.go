@@ -1,15 +1,18 @@
 package dto
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/ThinkiumGroup/go-common"
 	"github.com/ThinkiumGroup/go-common/trie"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
 	"github.com/ThinkiumGroup/web3.go/web3/complex/types"
 	"github.com/ThinkiumGroup/web3.go/web3/constants"
 	"github.com/ThinkiumGroup/web3.go/web3/thk/util"
 	"math/big"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -172,9 +175,46 @@ type BlockDetail struct {
 }
 
 type (
-	Public    []byte
-	Signature []byte
+	Public    [65]byte
+	Signature [65]byte
 )
+
+func (p Public) MarshalText() ([]byte, error) {
+	return hexutil.Bytes(p[:]).MarshalText()
+}
+
+var (
+	PublicT    = reflect.TypeOf(Public{})
+	SignatureT = reflect.TypeOf(Signature{})
+)
+
+func (p *Public) UnmarshalJSON(input []byte) error {
+	return hexutil.UnmarshalFixedJSON(PublicT, input, p[:])
+}
+
+func (p *Public) Bytes() []byte {
+	return p[:]
+
+}
+
+func (s *Signature) UnmarshalJSON(input []byte) error {
+	return hexutil.UnmarshalFixedJSON(SignatureT, input, s[:])
+}
+
+func (s *Signature) Bytes() []byte {
+	return s[:]
+}
+
+func (s Signature) MarshalText() ([]byte, error) {
+	return hexutil.Bytes(s[:]).MarshalText()
+}
+
+func (b *BlockDetail) Hash() common.Hash {
+	if b == nil || b.BlockHeader == nil {
+		return common.Hash{}
+	}
+	return b.BlockHeader.Hash()
+}
 
 type BlockHeader struct {
 	PreviousHash   common.Hash    `json:"previoushash"` // the hash of the previous block header on current chain
@@ -182,38 +222,228 @@ type BlockHeader struct {
 	ChainID        common.ChainID `json:"chainid"`      // current chain id
 	Height         common.Height  `json:"height"`       // height of current block
 	Empty          bool           `json:"empty"`        // empty block
-	ParentHeight   common.Height  `json:"-"`            // height of parent height, is 0 if current is main chain
-	ParentHash     *common.Hash   `json:"-"`            // block hash of main chain block at ParentHeight, nil if current is main chain
-	RewardAddress  common.Address `json:"-"`            // reward to
-	AttendanceHash *common.Hash   `json:"-"`            // The current epoch attendance record hash
-	RewardedCursor *common.Height `json:"-"`            // If the current chain is the reward chain, record start height of main chain when next reward issues
+	ParentHeight   common.Height  // height of parent height, is 0 if current is main chain
+	ParentHash     *common.Hash   // block hash of main chain block at ParentHeight, nil if current is main chain
+	RewardAddress  common.Address // reward to
+	AttendanceHash *common.Hash   // The current epoch attendance record hash
+	RewardedCursor *common.Height // If the current chain is the reward chain, record start height of main chain when next reward issues
 
-	CommitteeHash    *common.Hash   `json:"-"`    // current epoch Committee member trie root hash
-	ElectedNextRoot  *common.Hash   `json:"-"`    // root hash of the election result of next epoch committee members
+	CommitteeHash    *common.Hash   // current epoch Committee member trie root hash
+	ElectedNextRoot  *common.Hash   // root hash of the election result of next epoch committee members
 	NewCommitteeSeed *common.Seed   `json:"seed"` // Current election seeds, only in the main chain
-	RREra            *common.EraNum `json:"-"`    // the era corresponding to the root of the current Required Reserve tree. When this value is inconsistent with the height of main chain, it indicates that a new RR tree needs to be calculated
-	RRRoot           *common.Hash   `json:"-"`    // root hash of the Required Reserve tree in current era. Only in the reward chain and the main chain
-	RRNextRoot       *common.Hash   `json:"-"`    // root hash of the Required Reserve tree in next era. Only in the reward chain and the main chain
-	RRChangingRoot   *common.Hash   `json:"-"`    // changes waiting to be processed in current era
+	RREra            *common.EraNum // the era corresponding to the root of the current Required Reserve tree. When this value is inconsistent with the height of main chain, it indicates that a new RR tree needs to be calculated
+	RRRoot           *common.Hash   // root hash of the Required Reserve tree in current era. Only in the reward chain and the main chain
+	RRNextRoot       *common.Hash   // root hash of the Required Reserve tree in next era. Only in the reward chain and the main chain
+	RRChangingRoot   *common.Hash   // changes waiting to be processed in current era
 
 	MergedDeltaRoot  *common.Hash `json:"mergeroot"` // Root hash of the merged delta sent from other shards
 	BalanceDeltaRoot *common.Hash `json:"deltaroot"` // Root hash of the generated deltas by this block which needs to be sent to the other shards
 	StateRoot        common.Hash  `json:"stateroot"` // account on current chain state trie root hash
-	ChainInfoRoot    *common.Hash `json:"-"`         // for main chain only: all chain info trie root hash
-	WaterlinesRoot   *common.Hash `json:"-"`         // since v2.3.0, the waterlines of other shards to current chain after the execution of this block. nil represent all zeros. Because the value of the previous block needs to be inherited when the block is empty, values after block execution recorded.
-	VCCRoot          *common.Hash `json:"-"`         // Root hash of transfer out check tree in business chain
-	CashedRoot       *common.Hash `json:"-"`         // Root hash of transfer in check tree in business chain
-	TransactionRoot  *common.Hash `json:"-"`         // transactions in current block trie root hash
-	ReceiptRoot      *common.Hash `json:"-"`         // receipts for transactions in current block trie root hash
-	HdsRoot          *common.Hash `json:"-"`         // if there's any child chain of current chain, this is the Merkle trie root hash generated by the reported block header information of the child chain in order
+	ChainInfoRoot    *common.Hash // for main chain only: all chain info trie root hash
+	WaterlinesRoot   *common.Hash // since v2.3.0, the waterlines of other shards to current chain after the execution of this block. nil represent all zeros. Because the value of the previous block needs to be inherited when the block is empty, values after block execution recorded.
+	VCCRoot          *common.Hash // Root hash of transfer out check tree in business chain
+	CashedRoot       *common.Hash // Root hash of transfer in check tree in business chain
+	TransactionRoot  *common.Hash // transactions in current block trie root hash
+	ReceiptRoot      *common.Hash // receipts for transactions in current block trie root hash
+	HdsRoot          *common.Hash // if there's any child chain of current chain, this is the Merkle trie root hash generated by the reported block header information of the child chain in order
 
 	TimeStamp uint64 `json:"timestamp"`
 
-	ElectResultRoot *common.Hash `json:"-"` // Since v1.5.0, Election result hash root (including pre election and ordinary election, ordinary one has not been provided yet)
-	PreElectRoot    *common.Hash `json:"-"` // Since v1.5.0, the root hash of current preelecting list sorted by (Expire, ChainID), only in the main chain
-	FactorRoot      *common.Hash `json:"-"` // since v2.0.0, seed random factor hash
-	RRReceiptRoot   *common.Hash `json:"-"` // since v2.11.0, receipts of RRActs applied in current block
+	ElectResultRoot *common.Hash // Since v1.5.0, Election result hash root (including pre election and ordinary election, ordinary one has not been provided yet)
+	PreElectRoot    *common.Hash // Since v1.5.0, the root hash of current preelecting list sorted by (Expire, ChainID), only in the main chain
+	FactorRoot      *common.Hash // since v2.0.0, seed random factor hash
+	RRReceiptRoot   *common.Hash // since v2.11.0, receipts of RRActs applied in current block
 	Version         uint16       // since v2.11.0
+}
+
+func (h *BlockHeader) Hash() common.Hash {
+	hashOfHeader, err := h.HashValue()
+	if err != nil {
+		panic(fmt.Sprintf("BlockHeader %s merkle tree hash failed: %v", h, err))
+	}
+	return common.BytesToHash(hashOfHeader)
+}
+
+func (h *BlockHeader) HashValue() ([]byte, error) {
+	hashList, err := h.hashList()
+	if err != nil {
+		return nil, fmt.Errorf("BlockHeader %s hash failed: %v", h, err)
+	}
+	ret, err := common.MerkleHashComplete(hashList, 0, nil)
+	return ret, err
+}
+
+// Hash value and its corresponding position are generated together to generate hash, which can
+// prove that this value is the value in this position
+func hashIndexProperty(posBuffer [13]byte, index byte, h []byte) []byte {
+	indexHash := common.HeaderIndexHash(posBuffer, index)
+	return common.HashPair(indexHash, h)
+}
+
+func hashPointerHash(h *common.Hash) []byte {
+	if h == nil {
+		return common.NilHashSlice
+	} else {
+		return h[:]
+	}
+}
+func (h *BlockHeader) hashList() ([][]byte, error) {
+	if h == nil {
+		return nil, common.ErrNil
+	}
+	posBuffer := common.ToHeaderPosHashBuffer(h.ChainID, h.Height)
+	hashlist := make([][]byte, 0, 30)
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 0, h.PreviousHash[:]))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 1, h.HashHistory[:]))
+	hh, err := h.ChainID.HashValue()
+	if err != nil {
+		return nil, err
+	}
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 2, hh))
+	hh, err = h.Height.HashValue()
+	if err != nil {
+		return nil, err
+	}
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 3, hh))
+	var b byte = 0
+	if h.Empty {
+		b = 1
+	}
+	hh, err = common.Hash256s([]byte{b})
+	if err != nil {
+		return nil, err
+	}
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 4, hh))
+	hh, err = h.ParentHeight.HashValue()
+	if err != nil {
+		return nil, err
+	}
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 5, hh))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 6, hashPointerHash(h.ParentHash)))
+	hh, err = common.Hash256s(h.RewardAddress[:])
+	if err != nil {
+		return nil, err
+	}
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 7, hh))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 8, hashPointerHash(h.CommitteeHash)))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 9, hashPointerHash(h.ElectedNextRoot)))
+	if h.Version == 0 {
+		if h.NewCommitteeSeed == nil {
+			hh = common.NilHashSlice
+		} else {
+			hh = h.NewCommitteeSeed[:]
+		}
+		hh, err = common.Hash256s(hh)
+		if err != nil {
+			return nil, err
+		}
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 10, hh))
+	} else {
+		if h.NewCommitteeSeed == nil {
+			hh = common.NilHashSlice
+		} else {
+			hh = h.NewCommitteeSeed[:]
+			hh, err = common.Hash256s(hh)
+			if err != nil {
+				return nil, err
+			}
+		}
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 10, hh))
+	}
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 11, hashPointerHash(h.MergedDeltaRoot)))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 12, hashPointerHash(h.BalanceDeltaRoot)))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 13, h.StateRoot[:]))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 14, hashPointerHash(h.ChainInfoRoot)))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 15, hashPointerHash(h.WaterlinesRoot)))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 16, hashPointerHash(h.VCCRoot)))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 17, hashPointerHash(h.CashedRoot)))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 18, hashPointerHash(h.TransactionRoot)))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 19, hashPointerHash(h.ReceiptRoot)))
+	hashlist = append(hashlist, hashIndexProperty(posBuffer, 20, hashPointerHash(h.HdsRoot)))
+	{
+		bs := make([]byte, 8)
+		binary.BigEndian.PutUint64(bs, h.TimeStamp)
+		hh, err = common.Hash256s(bs)
+		if err != nil {
+			return nil, err
+		}
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 21, hh))
+	}
+	if h.Version == 0 {
+		// // TODO: should remove conditions when restart the chain with new version
+		// // v1.5.0: Because each leaf of merkle tree is not the field value of the block header, nil data is not NilHash
+		if h.AttendanceHash != nil || h.RewardedCursor != nil ||
+			h.RREra != nil || h.RRRoot != nil || h.RRNextRoot != nil || h.RRChangingRoot != nil {
+			hashlist = append(hashlist, hashIndexProperty(posBuffer, 22, hashPointerHash(h.AttendanceHash)))
+			if h.RewardedCursor == nil {
+				hh = common.NilHashSlice
+			} else {
+				hh, err = common.HashObject(h.RewardedCursor)
+				if err != nil {
+					return nil, err
+				}
+			}
+			hashlist = append(hashlist, hashIndexProperty(posBuffer, 23, hh))
+			if h.RREra == nil {
+				hh = common.NilHashSlice
+			} else {
+				hh, err = common.HashObject(h.RREra)
+				if err != nil {
+					return nil, err
+				}
+			}
+			hashlist = append(hashlist, hashIndexProperty(posBuffer, 24, hh))
+			hashlist = append(hashlist, hashIndexProperty(posBuffer, 25, hashPointerHash(h.RRRoot)))
+			hashlist = append(hashlist, hashIndexProperty(posBuffer, 26, hashPointerHash(h.RRNextRoot)))
+			hashlist = append(hashlist, hashIndexProperty(posBuffer, 27, hashPointerHash(h.RRChangingRoot)))
+			// add by v1.5.0
+			if h.ElectResultRoot != nil || h.PreElectRoot != nil {
+				hashlist = append(hashlist, hashIndexProperty(posBuffer, 28, hashPointerHash(h.ElectResultRoot)))
+				hashlist = append(hashlist, hashIndexProperty(posBuffer, 29, hashPointerHash(h.PreElectRoot)))
+			}
+			// add by v2.0.0 newSeed
+			if h.FactorRoot != nil {
+				hashlist = append(hashlist, hashIndexProperty(posBuffer, 30, hashPointerHash(h.FactorRoot)))
+			}
+		}
+	} else {
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 22, hashPointerHash(h.AttendanceHash)))
+		if h.RewardedCursor == nil {
+			hh = common.NilHashSlice
+		} else {
+			hh, err = common.HashObject(h.RewardedCursor)
+			if err != nil {
+				return nil, err
+			}
+		}
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 23, hh))
+		if h.RREra == nil {
+			hh = common.NilHashSlice
+		} else {
+			hh, err = common.HashObject(h.RREra)
+			if err != nil {
+				return nil, err
+			}
+		}
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 24, hh))
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 25, hashPointerHash(h.RRRoot)))
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 26, hashPointerHash(h.RRNextRoot)))
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 27, hashPointerHash(h.RRChangingRoot)))
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 28, hashPointerHash(h.ElectResultRoot)))
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 29, hashPointerHash(h.PreElectRoot)))
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 30, hashPointerHash(h.FactorRoot)))
+		hashlist = append(hashlist, hashIndexProperty(posBuffer, 31, hashPointerHash(h.RRReceiptRoot)))
+		{
+			bs := make([]byte, 2)
+			binary.BigEndian.PutUint16(bs, h.Version)
+			hh, err = common.Hash256s(bs)
+			if err != nil {
+				return nil, err
+			}
+			hashlist = append(hashlist, hashIndexProperty(posBuffer, 32, hh))
+		}
+	}
+	return hashlist, err
 }
 
 type BlockBody struct {

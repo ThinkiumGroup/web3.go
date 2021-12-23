@@ -2,6 +2,8 @@ package test
 
 import (
 	"fmt"
+	"github.com/ThinkiumGroup/go-common"
+	"github.com/ThinkiumGroup/web3.go/common/hexutil"
 	"github.com/ThinkiumGroup/web3.go/test"
 	"strconv"
 	"testing"
@@ -36,11 +38,24 @@ func TestThkGetBlockHeader(t *testing.T) {
 }
 
 func TestThkGetBlock(t *testing.T) {
-	res, err := test.Web3.Thk.GetBlock("1", "23456987")
+	res, err := test.Web3.Thk.GetBlock("1", "23456988")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
+	for _, pas := range res.BlockPass {
+		if pas == nil {
+			continue
+		}
+		t.Logf("pub:%s\nsig: %s", hexutil.Encode(pas.PublicKey.Bytes()), hexutil.Encode(pas.Signature.Bytes()))
+		h := res.BlockHeader.Hash()
+		t.Log(h.String())
+		if !common.VerifyMsg(res.BlockHeader, pas.PublicKey.Bytes(), pas.Signature.Bytes()) {
+			t.Log("check faild")
+			t.FailNow()
+		}
+	}
+
 	fmt.Printf("res:%+v", res)
 }
 

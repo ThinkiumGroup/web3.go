@@ -175,15 +175,15 @@ func (thk *Thk) GetBlock(chainId string, height string) (*dto.BlockDetail, error
 		ChainId: chainId,
 		Height:  height,
 	}
-	res := new(dto.BlockDetail)
-	if err := thk.provider.SendRequest(res, "GetBlock", params); err != nil {
+	var res dto.BlockDetail
+	if err := thk.provider.SendRequest(&res, "GetBlock", params); err != nil {
 		return nil, err
 	}
 	if res.ErrMsg != "" {
 		err := errors.New(res.ErrMsg)
 		return nil, err
 	}
-	return res, nil
+	return &res, nil
 }
 
 // Ping
