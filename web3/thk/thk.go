@@ -154,6 +154,22 @@ func (thk *Thk) GetTransactionByHash(chainId string, hash string) (*dto.TxResult
 	return res, nil
 }
 
+func (thk *Thk) GetTxProof(chainId string, hash string) (*dto.TxProof, error) {
+	params := util.GetTxByHash{
+		ChainId: chainId,
+		Hash:    hash,
+	}
+	res := new(dto.TxProof)
+	if err := thk.provider.SendRequest(res, "GetTxProof", params); err != nil {
+		return nil, err
+	}
+	if res.ErrMsg != "" {
+		err := errors.New(res.ErrMsg)
+		return nil, err
+	}
+	return res, nil
+}
+
 func (thk *Thk) GetBlockHeader(chainId string, height string) (*dto.GetBlockResult, error) {
 	params := util.GetBlockHeader{
 		ChainId: chainId,

@@ -212,6 +212,7 @@ func TestErc20Approve(t *testing.T) {
 
 //Transfer
 func TestErc20Transfer(t *testing.T) {
+	thk.SetBaseChainId(60000)
 	bytes, err := hexutil.Decode(strings.ToLower(tokenVestingAddress))
 	if err != nil {
 		t.Error(err)

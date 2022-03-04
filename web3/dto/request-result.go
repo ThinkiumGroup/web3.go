@@ -167,6 +167,70 @@ type Error struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
+
+type TxProof struct {
+	TxReceipt
+	Proof  MerkleItems `json:"proof"`
+	Error  string      `json:"errorMsg"`
+	ErrMsg string      `json:"ErrMsg,omitempty"`
+}
+type MerkleItem struct {
+	HashVal   hexutil.Bytes `json:"hash"`
+	Direction uint8         `json:"direction"`
+}
+type MerkleItems []MerkleItem
+type TxReceipt struct {
+	Transaction     *Transaction   `json:"tx"`                                  // Transaction data object
+	Sig             *PubAndSig     `json:"signature"`                           // transaction signature
+	PostState       []byte         `json:"root"`                                // It is used to record the information of transaction execution in JSON format, such as gas, cost "gas", and world state "root" after execution.
+	Status          uint64         `json:"status"`                              // Transaction execution status, 0: failed, 1: successful. (refers to whether the execution is abnormal)
+	Logs            []Log          `json:"logs" gencodec:"required"`            // The log written by the contract during execution
+	TxHash          common.Hash    `json:"transactionHash" gencodec:"required"` // Transaction Hash
+	ContractAddress common.Address `json:"contractAddress"`                     // If you are creating a contract, save the address of the created contract here
+	Out             hexutil.Bytes  `json:"out"`                                 // Return value of contract execution
+	Height          common.Height  `json:"blockHeight"`                         // The block where the transaction is packaged is high and will not be returned when calling
+	GasUsed         uint64         `json:"gasUsed"`                             // The gas value consumed by transaction execution is not returned in call
+	GasFee          string         `json:"gasFee"`                              // The gas cost of transaction execution is not returned in call
+	PostRoot        []byte         `json:"postroot"`                            // World state root after transaction execution (never return, always empty)
+	Error           string         `json:"errorMsg"`                            // Error message in case of transaction execution failure
+}
+
+type Transaction struct {
+	ChainId   uint32   `json:"chainid"`
+	From      string   `json:"from"`
+	To        string   `json:"to"`
+	Nonce     uint64   `json:"nonce"`
+	Value     *big.Int `json:"value"`
+	Input     string   `json:"input"`
+	Hash      string   `json:"hash"`
+	UseLocal  bool     `json:"uselocal"`
+	Extra     string   `json:"extra"` // 目前用来存交易类型，不存在时为普通交易，否则会对应特殊操作
+	Timestamp uint64   `json:"timestamp"`
+	Version   uint16   `json:"version"` // Version number used to distinguish different execution methods when the transaction execution is incompatible due to upgrade
+}
+type Log struct {
+	// Consensus fields:
+	// address of the contract that generated the event
+	Address common.Address `json:"address" gencodec:"required"`
+	// list of topics provided by the contract.
+	Topics []common.Hash `json:"topics" gencodec:"required"`
+	// supplied by the contract, usually ABI-encoded
+	Data []byte `json:"data" gencodec:"required"`
+
+	// Derived fields. These fields are filled in by the node
+	// but not secured by consensus.
+	// block in which the transaction was included
+	BlockNumber uint64 `json:"blockNumber" gencodec:"required"`
+	// hash of the transaction
+	TxHash common.Hash `json:"transactionHash" gencodec:"required"`
+	// index of the transaction in the block
+	TxIndex uint `json:"transactionIndex" gencodec:"required"`
+	// index of the log in the receipt
+	Index uint `json:"logIndex" gencodec:"required"`
+	// hash of the block in which the transaction was included
+	BlockHash *common.Hash `json:"blockHash"`
+}
+
 type BlockDetail struct {
 	BlockHeader *BlockHeader
 	BlockBody   *BlockBody
