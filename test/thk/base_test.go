@@ -29,7 +29,7 @@ func TestThkGetChainInfo(t *testing.T) {
 }
 
 func TestThkGetBlockHeader(t *testing.T) {
-	res, err := test.Web3.Thk.GetBlockHeader("1", "3648")
+	res, err := test.Web3.Thk.GetBlockHeader("1", "983918")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -38,7 +38,7 @@ func TestThkGetBlockHeader(t *testing.T) {
 }
 
 func TestThkGetBlock(t *testing.T) {
-	res, err := test.Web3.Thk.GetBlock("1", "23456988")
+	res, err := test.Web3.Thk.GetBlock("1", "983918")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
