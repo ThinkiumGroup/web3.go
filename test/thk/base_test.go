@@ -1,11 +1,13 @@
 package test
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/ThinkiumGroup/go-common"
 	"github.com/ThinkiumGroup/web3.go/common/hexutil"
 	"github.com/ThinkiumGroup/web3.go/test"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -60,11 +62,24 @@ func TestThkGetBlock(t *testing.T) {
 }
 
 func TestGetTxProof(t *testing.T) {
-	res, err := test.Web3.Thk.GetTxProof("1", "0x657bf5ab9e1f51100d31c5b049b8abac159359135ed04bd6b47ce9af116f0221")
+	hash := "0x22a38d12a1a12fe70573e3ec2ff0f5c9670dd7616883c38ec5f79adbca3da10a"
+	res, err := test.Web3.Thk.GetTxProof("2", hash)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
+	var txhash []byte
+	if strings.HasPrefix(hash, "0x") || strings.HasPrefix(hash, "0X") {
+		txhash, _ = hex.DecodeString(hash[2:])
+	} else {
+		txhash, _ = hex.DecodeString(hash)
+	}
+
+	proofed, err := res.Proof.Proof(txhash)
+	if err != nil {
+		fmt.Errorf("proof failed: %v", err)
+	}
+	fmt.Printf("txProof(%x) => %x\n", txhash, proofed)
 	fmt.Printf("res:%+v", test.JsonFormat(res))
 }
 

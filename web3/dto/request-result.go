@@ -177,6 +177,27 @@ type MerkleItem struct {
 	HashVal   hexutil.Bytes `json:"hash"`
 	Direction uint8         `json:"direction"`
 }
+
+func (m MerkleItem) Proof(toBeProof []byte) ([]byte, error) {
+	order := true
+	if m.Direction != 0 {
+		order = false
+	}
+	return common.HashPairOrder(order, m.HashVal, toBeProof)
+}
+
+func (ms MerkleItems) Proof(toBeProof []byte) ([]byte, error) {
+	r := toBeProof
+	var err error
+	for _, item := range ms {
+		r, err = item.Proof(r)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return r, nil
+}
+
 type MerkleItems []MerkleItem
 type TxReceipt struct {
 	Transaction     *Transaction   `json:"tx"`                                  // Transaction data object
