@@ -30,7 +30,7 @@ func (thk *Thk) NewContract(abistr string) (*Contract, error) {
 	contract.functions = make(map[string][]string)
 	for index := 0; index < len(jsonInterface); index++ {
 		function := jsonInterface[index].(map[string]interface{})
-		if function["type"] == "constructor" || function["type"] == "fallback" {
+		if function["type"] == "constructor" || function["type"] == "fallback" || function["type"] == "receive" {
 			function["name"] = function["type"]
 		}
 
